@@ -336,12 +336,10 @@ class Game:
         
         firstTurn_button.draw()
         if firstTurn_button.IsCollider():
-            self.Turn = "H_t"
             main(GameScene= 2, FirstMove= "H_t")
         
         secondTurn_button.draw()
         if secondTurn_button.IsCollider():
-            self.Turn = "C_t"
             main(GameScene= 2, FirstMove= "C_t")
         
         pygame.display.update()
@@ -419,13 +417,13 @@ class Game:
         
         mainMenu_button.draw()
         if mainMenu_button.IsCollider():
-            self.ResetGame(IsDrawBoard= False)
-            main()
+            self.ResetGame(IsDrawBoard= False) # Đệ quy lại hàm main
+            main() # Đệ quy lại hàm main
         
         reset_button.draw() 
         if reset_button.IsCollider():
             self.ResetGame(IsDrawBoard= False) # Cập nhật lại chỉ số game về ban đầu
-            main(GameScene = 2, FirstMove= Game_Turn) # Đệ quy lại hàm main (chạy lại hàm main từ đầu sau khi nhấn vào Reset game)
+            main(GameScene = 2, FirstMove= Game_Turn) # Đệ quy lại hàm main
         
         quit_button.draw()
         if quit_button.IsCollider():
