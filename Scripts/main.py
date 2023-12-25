@@ -42,7 +42,7 @@ screen.blit(background, (-300, 0))
 
     # Load SoundTrack
 pygame.mixer.init()
-pygame.mixer.music.load(r"C:\Users\admin\OneDrive\Máy tính\final exam\SoundTrack\soft japanese playlist to study-chill-sleep .mp3")
+pygame.mixer.music.load(r"C:\Users\admin\OneDrive\Máy tính\final exam\SoundTrack\soft japanese playlist to study-chill-sleep  (mp3cut.net).mp3")
 pygame.mixer.music.set_volume(0.5)
 pygame.mixer.music.play(-1)
     
