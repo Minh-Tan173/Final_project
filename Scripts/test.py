@@ -2,6 +2,8 @@ import copy
 import sys
 import pygame
 from math import inf as infinity
+import random
+
 
 # Screen infor
 WIDTH = 720
@@ -41,9 +43,9 @@ screen.blit(background, (-300, 0))
     # Load button 
 button = pygame.image.load(r"C:\Users\admin\OneDrive\Máy tính\final exam\asset\button.png").convert_alpha() # load ảnh button (image)
 button_pressed = pygame.image.load(r"C:\Users\admin\OneDrive\Máy tính\final exam\asset\buttonPressed.png").convert_alpha()
-width_button = button.get_width() # Nhận chiều dài của button image
-height_button = button.get_height() # Nhận chiều dài của button image
-Button_text = ["Start game", "Quit game", "Reset game", "Main menu"] # Các loại button xuất hiện ở menu
+width_button = button.get_width() # Nhận chiều dài của image button
+height_button = button.get_height() # Nhận chiều dài của image button
+Button_text = ["Start game", "Quit game", "Reset game", "Main menu", "First turn", "Second turn"] # Các loại button xuất hiện ở menu
 
 
 class Board:
@@ -164,9 +166,14 @@ class Board:
 
 class AI:
 
-    def __init__(self, level = 1, player=-1):
-        self.level = level
+    def __init__(self, player=-1):
         self.player = player
+        
+    def randomChoice(self, board):
+        empty_list = board.get_empty_sqrs()
+        RandomMove = random.choice(empty_list)
+        
+        return RandomMove
 
     def minimax(self, board, maximizing):
         
@@ -242,6 +249,7 @@ class Button:
     def draw(self):        
         screen.blit(self.image, self.Position)
         screen.blit(self.text, self.text_rect) # Vẽ chữ lên trên image
+        #pygame.draw.rect(screen, (255, 0, 0), self.image_rect, 2) # Hiển thị collider xung quanh button image
         
     def IsCollider(self):
         self.action = False
@@ -270,12 +278,13 @@ class Game:
         self.ai = AI()
         self.player = 1   #1-cross  #2-circles
         self.running = True
+        self.Turn = None
         
     # -- DRAW METHODS --
     def draw_Menu(self):
         # Load name game
         NameGame_font = pygame.font.Font(r"C:\Users\admin\OneDrive\Máy tính\final exam\font\Agbalumo-Regular.ttf", 100)
-        NameGame = NameGame_font.render("TIC TAC TOE", False, "#F5F5F5")
+        NameGame = NameGame_font.render("TIC TAC TOE", True, "#F5F5F5")
         Name_board = pygame.Rect((0,0), (HEIGHT, WIDTH//3))
         NameText_center = NameGame.get_rect(center = Name_board.center)
         
@@ -292,7 +301,7 @@ class Game:
         # Start button
         start_button.draw()
         if start_button.IsCollider():
-            main(MenuRunning = False)
+            main(GameScene= 1)
         
         # Quit button
         quit_button.draw()
@@ -300,53 +309,43 @@ class Game:
             pygame.quit()
             sys.exit()
     
-    def draw_FinalNotification(self, FinalText, GameState):
-        # Notification rect infor:
-        self.width_Rect = 300 + 50
-        self.Height_Rect = 300
-        self.pos_Rect = (((WIDTH - self.Height_Rect) // 2), ((WIDTH - self.Height_Rect) // 2) - 50)  
-        self.color_rect = "#00FFFF"
-        
-        # Final text notification
-        if GameState == 1:
-            self.FinalText = FinalState_font.render(FinalText, True, "#FFFFFF") # Nếu người chơi thắng thì in chữ màu trắng
-        elif GameState == -1:
-            self.FinalText = FinalState_font.render(FinalText, True, "#FF0033") # Nếu computer thắng thì in chữ màu đỏ
-        elif GameState == 0:
-            self.FinalText = FinalState_font.render(FinalText, True, "#00EE00") # Nếu draw thì in chữ màu xanh lá
-        
-        self.pos_Text = (self.pos_Rect[0] + 55, self.pos_Rect[1] + 20)
-        
-        # Type of button
-        quit_pos = (self.pos_Rect[0] + 70, self.pos_Rect[1] + 250)
-        quit_button = Button(Button_text[1], button, button_pressed, quit_pos, width_button, height_button, 0.2, 4)
-        
-        reset_pos = (self.pos_Rect[0] + 70, self.pos_Rect[1] + 200)
-        reset_button = Button(Button_text[2], button, button_pressed, reset_pos, width_button, height_button, 0.2, 4)
-        
-        mainMenu_pos = (self.pos_Rect[0] + 70, self.pos_Rect[1] + 150)
-        mainMenu_button = Button(Button_text[3], button, button_pressed, mainMenu_pos, width_button, height_button, 0.2, 4)
-               
+    def draw_CheckFirstTurn(self):
         # Bảng trạng thái
-        pygame.draw.rect(screen, self.color_rect, (self.pos_Rect, (self.Height_Rect, self.width_Rect)), border_radius = 10)
-        screen.blit(self.FinalText, self.pos_Text)
+        SizeBoard = (400, 200)
+        PosBoard = (HEIGHT//2 - SizeBoard[0]//2, 250)
+        ColorBoard = "#00FFFF"
         
-        # Draw button
+        # Button
+        firstTurn_pos = (PosBoard[0] + 30, PosBoard[1] + 130)
+        firstTurn_button = Button(Button_text[4], button, button_pressed, firstTurn_pos, width_button, height_button, 0.2, 4)
         
-        mainMenu_button.draw()
-        if mainMenu_button.IsCollider():
-            main(MenuRunning = True)
+        secondTurn_pos = (PosBoard[0] + 220, PosBoard[1] + 130)
+        secondTurn_button = Button(Button_text[5], button, button_pressed, secondTurn_pos, width_button, height_button, 0.2, 4)
+    
+        # Question
+        question_font = pygame.font.Font(r"C:\Users\admin\OneDrive\Máy tính\final exam\font\Agbalumo-Regular.ttf", 25)
+        question_line1 = question_font.render("    Do you want to play the first", True, "#F5F5F5")
+        question_line2 = question_font.render("the first turn or the second turn?", True, "#F5F5F5")
+        question_line1_pos = (PosBoard[0] + 15, PosBoard[1] + 30)
+        question_line2_pos = (PosBoard[0] + 15, PosBoard[1] + 70)
         
-        reset_button.draw()
-        if reset_button.IsCollider():
-            self.ResetGame() # Cập nhật lại chỉ số game về ban đầu
-            main(MenuRunning = False) # Đệ quy lại hàm main (chạy lại hàm main từ đầu sau khi nhấn vào Reset game)
+        # Draw
+        pygame.draw.rect(screen, ColorBoard, (PosBoard, SizeBoard), border_radius=10)
+        screen.blit(question_line1, question_line1_pos)
+        screen.blit(question_line2, question_line2_pos)
         
-        quit_button.draw()
-        if quit_button.IsCollider():
-            pygame.quit()
-            sys.exit()     
-
+        firstTurn_button.draw()
+        if firstTurn_button.IsCollider():
+            self.Turn = "H_t"
+            main(GameScene= 2, FirstMove= "H_t")
+        
+        secondTurn_button.draw()
+        if secondTurn_button.IsCollider():
+            self.Turn = "C_t"
+            main(GameScene= 2, FirstMove= "C_t")
+        
+        pygame.display.update()
+    
     def DrawBoard(self,  WidthBoard, HeightBoard, LineSize, column, row, position, color):
         # Board infor
         SizeBoard = (WidthBoard, HeightBoard)
@@ -385,6 +384,54 @@ class Game:
             text_rect_o = X_fig.get_rect(center = TopRect_o.center) # Cập nhật lại toạ độ tâm của Text_fig
             screen.blit(O_fig, text_rect_o) 
 
+    def draw_FinalNotification(self, FinalText, GameState, Game_Turn):
+        # Notification rect infor:
+        self.width_Rect = 300 + 50
+        self.height_Rect = 300
+        self.pos_Rect = (((WIDTH - self.height_Rect) // 2), ((WIDTH - self.height_Rect) // 2) - 50)  
+        self.color_rect = "#00FFFF"
+        
+        # Final text notification
+        if GameState == 1:
+            self.FinalText = FinalState_font.render(FinalText, True, "#FFFFFF") # Nếu người chơi thắng thì in chữ màu trắng
+        elif GameState == -1:
+            self.FinalText = FinalState_font.render(FinalText, True, "#FF0033") # Nếu computer thắng thì in chữ màu đỏ
+        elif GameState == 0:
+            self.FinalText = FinalState_font.render(FinalText, True, "#00EE00") # Nếu draw thì in chữ màu xanh lá
+        
+        self.pos_Text = (self.pos_Rect[0] + 55, self.pos_Rect[1] + 20)
+        
+        # Type of button
+        quit_pos = (self.pos_Rect[0] + 70, self.pos_Rect[1] + 270)
+        quit_button = Button(Button_text[1], button, button_pressed, quit_pos, width_button, height_button, 0.2, 4)
+        
+        reset_pos = (self.pos_Rect[0] + 70, self.pos_Rect[1] + 210)
+        reset_button = Button(Button_text[2], button, button_pressed, reset_pos, width_button, height_button, 0.2, 4)
+        
+        mainMenu_pos = (self.pos_Rect[0] + 70, self.pos_Rect[1] + 150)
+        mainMenu_button = Button(Button_text[3], button, button_pressed, mainMenu_pos, width_button, height_button, 0.2, 4)
+               
+        # Vẽ bảng trạng thái
+        pygame.draw.rect(screen, self.color_rect, (self.pos_Rect, (self.height_Rect, self.width_Rect)), border_radius = 10)
+        screen.blit(self.FinalText, self.pos_Text)
+        
+        # Draw button
+        
+        mainMenu_button.draw()
+        if mainMenu_button.IsCollider():
+            self.ResetGame(IsDrawBoard= False)
+            main()
+        
+        reset_button.draw() 
+        if reset_button.IsCollider():
+            self.ResetGame(IsDrawBoard= False) # Cập nhật lại chỉ số game về ban đầu
+            main(GameScene = 2, FirstMove= Game_Turn) # Đệ quy lại hàm main (chạy lại hàm main từ đầu sau khi nhấn vào Reset game)
+        
+        quit_button.draw()
+        if quit_button.IsCollider():
+            pygame.quit()
+            sys.exit()
+             
     # --- OTHER METHODS ---
     def make_move(self, row, col):
         self.board.mark_sqr(row, col, self.player)
@@ -397,7 +444,7 @@ class Game:
     def isover(self):
         return self.board.final_state(show=True) != 0 or self.board.isFull()
     
-    def ResetGame(self):
+    def ResetGame(self, IsDrawBoard = True):
         # Đặt lại trạng thái game bằng cách tạo mới các đối tượng cần thiết
         self.board = Board()
         self.ai = AI()
@@ -406,23 +453,23 @@ class Game:
 
         # Đặt lại màn hình
         screen.blit(background, (-300, 0))
-        self.DrawBoard(WidthBoard, HeightBoard, LineSize, columnBoard, rowBoard, board_position, color)
+        if IsDrawBoard:
+            self.DrawBoard(WidthBoard, HeightBoard, LineSize, columnBoard, rowBoard, board_position, color)
 
         # Cập nhật màn hình
         pygame.display.update()
-                    
+    
 
-def main(MenuRunning = True):
+def main(GameScene = 0, FirstMove = None):
     # --- Game objects ---
     game = Game()    
     board = game.board # Biến board là object của class Board
     ai = game.ai # Biến ai là object của class AI
-    
     FinalText, GameState = None, None
-
-    if MenuRunning:
-        running = True
-        while running:
+    
+    # --- Game state ---
+    if GameScene == 0: # Khởi chạy màn hình menu nếu MenuRunning = True
+        while True:
             for event in pygame.event.get():
     
                 # quit event
@@ -434,12 +481,32 @@ def main(MenuRunning = True):
         
             pygame.display.update()
     
-    else:
-        screen.blit(background, (-300, 0))
-        game.DrawBoard(WidthBoard, HeightBoard, LineSize, columnBoard, rowBoard, board_position, color)  
+    elif GameScene == 1: # Khởi chạy màn hình main game nếu MenuRunning = False
+        screen.blit(background, (-300, 0))        
+        # Hỏi xem người chơi muốn đi trước hay đi sau
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
         
+            game.draw_CheckFirstTurn()
+            
+            pygame.display.update()
+    
+    elif GameScene == 2:
+        # Bắt đầu game
+        pygame.display.update()
+        screen.blit(background, (-300, 0))
+        game.DrawBoard(WidthBoard, HeightBoard, LineSize, columnBoard, rowBoard, board_position, color) # Vẽ bảng
+        Turn = FirstMove
         # --- Game loop ---
         while True:
+            if FirstMove == "C_t":
+                row, col = ai.randomChoice(board)
+                game.player = -1
+                game.make_move(row, col)
+                FirstMove = None
             
             # pygame events
             for event in pygame.event.get():
@@ -460,7 +527,7 @@ def main(MenuRunning = True):
                             if board.Is_empty(row, col) and game.running:
                                 game.make_move(row, col)
 
-                                if game.isover():
+                                if game.isover():# Nếu game đã kết thúc (board đã full hoặc human win)
                                     # Trạng thái cuối cùng của game
                                     if board.isFull():
                                         FinalText = "Draw!"
@@ -475,15 +542,14 @@ def main(MenuRunning = True):
 
             # AI initial call
             if game.player == ai.player and game.running:
-
                 # update the screen
                 pygame.display.update()
-
+                
                 # eval
                 row, col = ai.eval(board)
                 game.make_move(row, col)
 
-                if game.isover():
+                if game.isover(): # Nếu game đã kết thúc (board đã full hoặc computer win)
                     if board.isFull():
                         FinalText = "Draw!"
                         GameState = 0
@@ -497,7 +563,7 @@ def main(MenuRunning = True):
             
             # Bảng thông báo sau khi kết thúc game
             if game.running == False:
-                game.draw_FinalNotification(FinalText = FinalText, GameState = GameState)
+                game.draw_FinalNotification(FinalText = FinalText, GameState = GameState, Game_Turn= Turn)
                 
             pygame.display.update()
 

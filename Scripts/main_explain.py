@@ -49,7 +49,7 @@ class Button():
         self.text_rect.center = self.coordinates
         screen.blit(self.text, self.text_rect) # Vẽ chữ lên trên image
         
-        # pygame.draw.rect(screen, (255, 0, 0), self.image_rect, 2) # Hiển thị collider xung quanh button image
+        pygame.draw.rect(screen, (255, 0, 0), self.image_rect, 2) # Hiển thị collider xung quanh button image
         # pygame.draw.rect(screen, (255, 0, 0), self.text_rect, 2) # Hiển thị collider xung quanh text image
     
     def IsCollider(self):
